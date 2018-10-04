@@ -18,7 +18,7 @@ var defaultPlotOptions = H.defaultPlotOptions,
  *
  * @sample stock/demo/candlestick/ Candlestick chart
  *
- * @extends plotOptions.ohlc
+ * @extends {plotOptions.ohlc}
  * @excluding borderColor,borderRadius,borderWidth
  * @product highstock
  * @optionparent plotOptions.candlestick
@@ -63,7 +63,7 @@ var candlestickOptions = {
     },
 
     /**
-     * @extends plotOptions.ohlc.tooltip
+     * @extends {plotOptions.ohlc.tooltip}
      */
     tooltip: defaultPlotOptions.ohlc.tooltip,
 
@@ -168,8 +168,7 @@ seriesType('candlestick', 'ohlc', merge(
     drawPoints: function () {
         var series = this,
             points = series.points,
-            chart = series.chart,
-            reversedYAxis = series.yAxis.reversed;
+            chart = series.chart;
 
 
         each(points, function (point) {
@@ -210,12 +209,9 @@ seriesType('candlestick', 'ohlc', merge(
                 topBox = Math.min(plotOpen, plotClose);
                 bottomBox = Math.max(plotOpen, plotClose);
                 halfWidth = Math.round(point.shapeArgs.width / 2);
-                hasTopWhisker = reversedYAxis ?
-                    bottomBox !== point.yBottom :
+                hasTopWhisker =
                     Math.round(topBox) !== Math.round(point.plotHigh);
-                hasBottomWhisker = reversedYAxis ?
-                    Math.round(topBox) !== Math.round(point.plotHigh) :
-                    bottomBox !== point.yBottom;
+                hasBottomWhisker = bottomBox !== point.yBottom;
                 topBox = Math.round(topBox) + crispCorr;
                 bottomBox = Math.round(bottomBox) + crispCorr;
 
@@ -239,19 +235,13 @@ seriesType('candlestick', 'ohlc', merge(
                     crispX, topBox,
                     'L',
                     // #460, #2094
-                    crispX, hasTopWhisker ?
-                        Math.round(
-                            reversedYAxis ? point.yBottom : point.plotHigh
-                        ) :
-                        topBox,
+                    crispX, hasTopWhisker ? Math.round(point.plotHigh) : topBox,
                     'M',
                     crispX, bottomBox,
                     'L',
                     // #460, #2094
                     crispX, hasBottomWhisker ?
-                        Math.round(
-                            reversedYAxis ? point.plotHigh : point.yBottom
-                        ) :
+                        Math.round(point.yBottom) :
                         bottomBox
                 );
 
@@ -298,8 +288,8 @@ seriesType('candlestick', 'ohlc', merge(
  *     ]
  *  ```
  *
- * 2.  An array of objects with named values. The following snippet shows only a
- * few settings, see the complete options set below. If the total number of data
+ * 2.  An array of objects with named values. The objects are point
+ * configuration objects as seen below. If the total number of data
  * points exceeds the series' [turboThreshold](
  * #series.candlestick.turboThreshold), this option is not available.
  *

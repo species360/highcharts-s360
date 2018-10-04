@@ -19,9 +19,7 @@ var each = H.each,
  * measurement.
  *
  * @sample       highcharts/demo/error-bar/
- *               Error bars on a column series
- * @sample       highcharts/series-errorbar/on-scatter/
- *               Error bars on a scatter series
+ *               Error bars
  * @extends      {plotOptions.boxplot}
  * @product      highcharts highstock
  * @optionparent plotOptions.errorbar
@@ -134,8 +132,8 @@ seriesType('errorbar', 'boxplot', {
  *     ]
  *  ```
  *
- * 2.  An array of objects with named values. The following snippet shows only a
- * few settings, see the complete options set below. If the total number of data
+ * 2.  An array of objects with named values. The objects are point
+ * configuration objects as seen below. If the total number of data
  * points exceeds the series' [turboThreshold](#series.errorbar.turboThreshold),
  * this option is not available.
  *

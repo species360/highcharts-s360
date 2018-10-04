@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v6.1.4-modified (2018-10-01)
+ * @license Highcharts JS v6.1.1 (2018-10-04)
  * Old IE (v6, v7, v8) module for Highcharts v6+.
  *
  * (c) 2010-2017 Highsoft AS
@@ -72,7 +72,7 @@
 		 * @since 2.3.0
 		 */
 		H.getOptions().global.VMLRadialGradientURL =
-		    'http://code.highcharts.com/6.1.4-modified/gfx/vml-radial-gradient.png';
+		    'http://code.highcharts.com/6.1.1/gfx/vml-radial-gradient.png';
 
 
 		// Utilites
@@ -115,10 +115,7 @@
 		        var i = 0,
 		            len = this.length;
 		        for (; i < len; i++) {
-		            if (
-		                this[i] !== undefined && // added check
-		                fn.call(ctx, this[i], i, this) === false
-		            ) {
+		            if (fn.call(ctx, this[i], i, this) === false) {
 		                return i;
 		            }
 		        }
@@ -126,16 +123,15 @@
 		}
 
 		if (!Array.prototype.indexOf) {
-		    H.indexOfPolyfill = function (member, fromIndex) {
-		        var arr = this, // #8874
-		            len,
-		            i = fromIndex || 0; // #8346
+		    H.indexOfPolyfill = function (arr) {
+		        var len,
+		            i = 0;
 
 		        if (arr) {
 		            len = arr.length;
 
 		            for (; i < len; i++) {
-		                if (arr[i] === member) {
+		                if (arr[i] === this) {
 		                    return i;
 		                }
 		            }
@@ -162,16 +158,15 @@
 		}
 
 		if (!Array.prototype.some) {
-		    H.somePolyfill = function (fn, ctx) { // legacy
+		    H.some = function (fn, ctx) { // legacy
 		        var i = 0,
 		            len = this.length;
 
 		        for (; i < len; i++) {
 		            if (fn.call(ctx, this[i], i, this) === true) {
-		                return true;
+		                return;
 		            }
 		        }
-		        return false;
 		    };
 		}
 
@@ -438,7 +433,7 @@
 		            // Firefox 3.5+ on user request. FF3.5+ has support for CSS3
 		            // transform. The getBBox method also needs to be updated to
 		            // compensate for the rotation, like it currently does for SVG.
-		            // Test case: https://jsfiddle.net/highcharts/Ybt44/
+		            // Test case: http://jsfiddle.net/highcharts/Ybt44/
 
 		            var rotation = this.rotation,
 		                costheta = Math.cos(rotation * deg2rad),

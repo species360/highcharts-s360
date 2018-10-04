@@ -249,7 +249,7 @@ H.initCanvasBoost = function () {
                 maxVal,
                 minI,
                 maxI,
-                index,
+                kdIndex,
                 sdata = isStacked ? series.data : (xData || rawData),
                 fillColor = series.fillOpacity ?
                         new Color(series.color).setOpacity(
@@ -327,25 +327,15 @@ H.initCanvasBoost = function () {
                     };
                 },
 
-                compareX = options.findNearestPointBy === 'x',
-
-                xDataFull = (
-                    this.xData ||
-                    this.options.xData ||
-                    this.processedXData ||
-                    false
-                ),
-
-
                 addKDPoint = function (clientX, plotY, i) {
-                    // Shaves off about 60ms compared to repeated concatenation
-                    index = compareX ? clientX : clientX + ',' + plotY;
+                    // Avoid more string concatination than required
+                    kdIndex = clientX + ',' + plotY;
 
-                    // The k-d tree requires series points.
-                    // Reduce the amount of points, since the time to build the
-                    // tree increases exponentially.
-                    if (enableMouseTracking && !pointTaken[index]) {
-                        pointTaken[index] = true;
+                    // The k-d tree requires series points. Reduce the amount of
+                    // points, since the time to build the tree increases
+                    // exponentially.
+                    if (enableMouseTracking && !pointTaken[kdIndex]) {
+                        pointTaken[kdIndex] = true;
 
                         if (chart.inverted) {
                             clientX = xAxis.len - clientX;
@@ -353,7 +343,6 @@ H.initCanvasBoost = function () {
                         }
 
                         points.push({
-                            x: xDataFull ? xDataFull[cropStart + i] : false,
                             clientX: clientX,
                             plotX: clientX,
                             plotY: plotY,

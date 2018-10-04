@@ -1,5 +1,5 @@
 /*
- Highcharts JS v6.1.4-modified (2018-10-01)
+ Highcharts JS v6.1.1 (2018-10-04)
  Data module
 
  (c) 2012-2017 Torstein Honsi
@@ -32,6 +32,5 @@ g.populateColumns(e)&&m.push(g);for(;0<e.length;){g=new x;g.addColumnReader(0,"x
 "name");for(d=0;d<m.length;d++){g=m[d];e=[];for(h=0;h<a[0].length;h++)e[h]=g.read(a,h);f[d]={data:e};g.name&&(f[d].name=g.name);"category"===b&&(f[d].turboThreshold=0)}a={series:f};b&&(a.xAxis={type:b},"category"===b&&(a.xAxis.uniqueNames=!1));c.complete&&c.complete(a);c.afterComplete&&c.afterComplete(a)}},update:function(a,b){var c=this.chart;a&&(a.afterComplete=function(a){a.xAxis&&c.xAxis[0]&&a.xAxis.type===c.xAxis[0].options.type&&delete a.xAxis;c.update(a,b,!0)},z(!0,this.options,a),this.init(this.options))}});
 h.Data=A;h.data=function(a,b){return new A(a,b)};q(m,"init",function(a){var b=this,c=a.args[0],f=a.args[1];c&&c.data&&!b.hasDataDef&&(b.hasDataDef=!0,b.data=new A(h.extend(c.data,{afterComplete:function(a){var d,e;if(c.hasOwnProperty("series"))if("object"===typeof c.series)for(d=Math.max(c.series.length,a&&a.series?a.series.length:0);d--;)e=c.series[d]||{},c.series[d]=z(e,a&&a.series?a.series[d]:{});else delete c.series;c=z(a,c);b.init(c,f)}}),c,b),a.preventDefault())});x=function(){this.readers=
 [];this.pointIsArray=!0};x.prototype.populateColumns=function(a){var b=!0;u(this.readers,function(b){void 0===b.columnIndex&&(b.columnIndex=a.shift())});u(this.readers,function(a){void 0===a.columnIndex&&(b=!1)});return b};x.prototype.read=function(a,b){var c=this.pointIsArray,f=c?[]:{},e;u(this.readers,function(d){var e=a[d.columnIndex][b];c?f.push(e):0<d.configName.indexOf(".")?h.Point.prototype.setNestedProperty(f,e,d.configName):f[d.configName]=e});void 0===this.name&&2<=this.readers.length&&
-(e=this.getReferencedColumnIndexes(),2<=e.length&&(e.shift(),e.sort(function(a,b){return a-b}),this.name=a[e.shift()].name));return f};x.prototype.addColumnReader=function(a,b){this.readers.push({columnIndex:a,configName:b});"x"!==b&&"y"!==b&&void 0!==b&&(this.pointIsArray=!1)};x.prototype.getReferencedColumnIndexes=function(){var a,b=[],c;for(a=0;a<this.readers.length;a+=1)c=this.readers[a],void 0!==c.columnIndex&&b.push(c.columnIndex);return b};x.prototype.hasReader=function(a){var b,c;for(b=0;b<
-this.readers.length;b+=1)if(c=this.readers[b],c.configName===a)return!0}})(q)});
-//# sourceMappingURL=data.js.map
+(e=this.getReferencedColumnIndexes(),2<=e.length&&(e.shift(),e.sort(),this.name=a[e.shift()].name));return f};x.prototype.addColumnReader=function(a,b){this.readers.push({columnIndex:a,configName:b});"x"!==b&&"y"!==b&&void 0!==b&&(this.pointIsArray=!1)};x.prototype.getReferencedColumnIndexes=function(){var a,b=[],c;for(a=0;a<this.readers.length;a+=1)c=this.readers[a],void 0!==c.columnIndex&&b.push(c.columnIndex);return b};x.prototype.hasReader=function(a){var b,c;for(b=0;b<this.readers.length;b+=
+1)if(c=this.readers[b],c.configName===a)return!0}})(q)});

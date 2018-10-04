@@ -1,5 +1,5 @@
 /**
- * @license  Highcharts JS v6.1.4-modified (2018-10-01)
+ * @license  Highcharts JS v6.1.1 (2018-10-04)
  *
  * Indicator series type for Highstock
  *
@@ -78,7 +78,7 @@
 		     *
 		     * This series requires `linkedTo` option to be set.
 		     *
-		     * @extends plotOptions.sma
+		     * @extends {plotOptions.sma}
 		     * @product highstock
 		     * @sample {highstock} stock/indicators/roc
 		     *                     Rate of change indicator

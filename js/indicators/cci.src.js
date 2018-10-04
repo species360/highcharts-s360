@@ -1,5 +1,5 @@
 /**
- * @license  Highcharts JS v6.1.4-modified (2018-10-01)
+ * @license  Highcharts JS v6.1.1 (2018-10-04)
  *
  * Indicator series type for Highstock
  *
@@ -54,7 +54,7 @@
 		     * Commodity Channel Index (CCI). This series requires `linkedTo` option to
 		     * be set.
 		     *
-		     * @extends plotOptions.sma
+		     * @extends {plotOptions.sma}
 		     * @product highstock
 		     * @sample {highstock} stock/indicators/cci CCI indicator
 		     * @since 6.0.0

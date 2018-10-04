@@ -34,11 +34,7 @@ seriesType('item', 'column', {
     drawPoints: function () {
         var series = this,
             renderer = series.chart.renderer,
-            seriesMarkerOptions = this.options.marker,
-            itemPaddingTranslated = this.yAxis.transA *
-                series.options.itemPadding,
-            borderWidth = this.borderWidth,
-            crisp = borderWidth % 2 ? 0.5 : 1;
+            seriesMarkerOptions = this.options.marker;
 
         each(this.points, function (point) {
             var yPos,
@@ -51,15 +47,8 @@ seriesType('item', 'column', {
                     pointMarkerOptions.symbol ||
                     seriesMarkerOptions.symbol
                 ),
-                radius = pick(
-                    pointMarkerOptions.radius,
-                    seriesMarkerOptions.radius
-                ),
                 size,
-                yTop,
-                isSquare = symbol !== 'rect',
-                x,
-                y;
+                yTop;
 
             point.graphics = graphics = point.graphics || {};
             pointAttr = point.pointAttr ?
@@ -80,28 +69,18 @@ seriesType('item', 'column', {
                 yTop = pick(point.stackY, point.y);
                 size = Math.min(
                     point.pointWidth,
-                    series.yAxis.transA - itemPaddingTranslated
+                    (
+                        series.yAxis.transA *
+                        (1 - series.options.itemPadding)
+                    )
                 );
                 for (yPos = yTop; yPos > yTop - point.y; yPos--) {
 
-                    x = point.barX + (
-                        isSquare ?
-                            point.pointWidth / 2 - size / 2 :
-                            0
-                    );
-                    y = series.yAxis.toPixels(yPos, true) +
-                        itemPaddingTranslated / 2;
-
-                    if (series.options.crisp) {
-                        x = Math.round(x) - crisp;
-                        y = Math.round(y) + crisp;
-                    }
                     attr = {
-                        x: x,
-                        y: y,
-                        width: Math.round(isSquare ? size : point.pointWidth),
-                        height: Math.round(size),
-                        r: radius
+                        x: point.barX + point.pointWidth / 2 - size / 2,
+                        y: series.yAxis.toPixels(yPos, true) - size / 2,
+                        width: size,
+                        height: size
                     };
 
                     if (graphics[itemY]) {
@@ -127,8 +106,4 @@ seriesType('item', 'column', {
 
     }
 });
-
-H.SVGRenderer.prototype.symbols.rect = function (x, y, w, h, options) {
-    return H.SVGRenderer.prototype.symbols.callout(x, y, w, h, options);
-};
 

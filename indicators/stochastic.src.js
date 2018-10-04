@@ -1,5 +1,5 @@
 /**
- * @license  Highcharts JS v6.1.4-modified (2018-10-01)
+ * @license  Highcharts JS v6.1.1 (2018-10-04)
  *
  * Indicator series type for Highstock
  *
@@ -46,7 +46,7 @@
 		     * Stochastic oscillator. This series requires the `linkedTo` option to be
 		     * set and should be loaded after the `stock/indicators/indicators.js` file.
 		     *
-		     * @extends plotOptions.sma
+		     * @extends {plotOptions.sma}
 		     * @product highstock
 		     * @sample {highstock} stock/indicators/stochastic
 		     *                     Stochastic oscillator
@@ -208,7 +208,7 @@
 
 		            // Stochastic requires close value
 		            if (
-		                yValLen < periodK ||
+		                xVal.length < periodK ||
 		                !isArray(yVal[0]) ||
 		                yVal[0].length !== 4
 		            ) {
@@ -227,14 +227,11 @@
 		                HL = maxInArray(slicedY, high) - LL;
 		                K = CL / HL * 100;
 
-		                xData.push(xVal[i]);
-		                yData.push([K, null]);
-
 		                // Calculate smoothed %D, which is SMA of %K
-		                if (i >= (periodK - 1) + (periodD - 1)) {
+		                if (i >= periodK + periodD) {
 		                    points = SMA.prototype.getValues.call(this, {
-		                        xData: xData.slice(-periodD),
-		                        yData: yData.slice(-periodD)
+		                        xData: xData.slice(i - periodD - periodK, i - periodD),
+		                        yData: yData.slice(i - periodD - periodK, i - periodD)
 		                    }, {
 		                        period: periodD
 		                    });
@@ -242,7 +239,8 @@
 		                }
 
 		                SO.push([xVal[i], K, D]);
-		                yData[yData.length - 1][1] = D;
+		                xData.push(xVal[i]);
+		                yData.push([K, D]);
 		            }
 
 		            return {

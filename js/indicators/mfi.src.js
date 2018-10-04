@@ -1,5 +1,5 @@
 /**
- * @license  Highcharts JS v6.1.4-modified (2018-10-01)
+ * @license  Highcharts JS v6.1.1 (2018-10-04)
  *
  * Money Flow Index indicator for Highstock
  *
@@ -58,7 +58,7 @@
 		     * Money Flow Index. This series requires `linkedTo` option to be set and
 		     * should be loaded after the `stock/indicators/indicators.js` file.
 		     *
-		     * @extends plotOptions.sma
+		     * @extends {plotOptions.sma}
 		     * @product highstock
 		     * @sample {highstock} stock/indicators/mfi
 		     *                     Money Flow Index Indicator

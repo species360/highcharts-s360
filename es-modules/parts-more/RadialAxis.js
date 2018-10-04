@@ -418,10 +418,9 @@ if (!H.radialAxisExtended) {
             // Concentric circles
             } else if (axis.options.gridLineInterpolation === 'circle') {
                 value = axis.translate(value);
-
-                // a value of 0 is in the center, so it won't be visible,
-                // but draw it anyway for update and animation (#2366)
-                ret = axis.getLinePath(0, value);
+                if (value) { // a value of 0 is in the center
+                    ret = axis.getLinePath(0, value);
+                }
             // Concentric polygons
             } else {
                 // Find the X axis in the same pane

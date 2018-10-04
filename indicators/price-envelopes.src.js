@@ -1,5 +1,5 @@
 /**
- * @license  Highcharts JS v6.1.4-modified (2018-10-01)
+ * @license  Highcharts JS v6.1.1 (2018-10-04)
  *
  * Indicator series type for Highstock
  *
@@ -33,7 +33,7 @@
 		     * This series requires the `linkedTo` option to be set and should be loaded
 		     * after the `stock/indicators/indicators.js` file.
 		     *
-		     * @extends plotOptions.sma
+		     * @extends {plotOptions.sma}
 		     * @product highstock
 		     * @sample {highstock} stock/indicators/price-envelopes
 		     *                     Price envelopes
@@ -99,7 +99,7 @@
 		        /**
 		         * Top line options.
 		         *
-		         * @extends plotOptions.priceenvelopes.bottomLine
+		         * @extends {plotOptions.priceenvelopes.bottomLine}
 		         * @since 6.0.0
 		         * @product highstock
 		         */

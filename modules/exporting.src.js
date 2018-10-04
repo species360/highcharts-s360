@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v6.1.4-modified (2018-10-01)
+ * @license Highcharts JS v6.1.1 (2018-10-04)
  * Exporting module
  *
  * (c) 2010-2017 Torstein Honsi
@@ -403,7 +403,7 @@
 
 		/**
 		 * Options for the exporting module. For an overview on the matter, see
-		 * [the docs](https://www.highcharts.com/docs/export-module/export-module-overview).
+		 * [the docs](http://www.highcharts.com/docs/export-module/export-module-overview).
 		 * @type {Object}
 		 * @optionparent exporting
 		 */
@@ -673,7 +673,7 @@
 		             * the `Highcharts.Renderer.symbols` collection. The default
 		             * `exportIcon` function is part of the exporting module.
 		             *
-		             * @validvalue ["exportIcon", "circle", "square", "diamond", "triangle", "triangle-down", "menu"]
+		             * @validvalue ["circle", "square", "diamond", "triangle", "triangle-down", "menu"]
 		             * @type {String}
 		             * @sample highcharts/exporting/buttons-contextbutton-symbol/
 		             *         Use a circle for symbol
@@ -689,19 +689,9 @@
 		             * button's title tooltip. When the key is `contextButtonTitle`, it
 		             * refers to [lang.contextButtonTitle](#lang.contextButtonTitle)
 		             * that defaults to "Chart context menu".
-		             *
-		             * @since 6.1.4
+		             * @type {String}
 		             */
-		            titleKey: 'contextButtonTitle',
-
-		            /**
-		             * This option is deprecated, use
-		             * [titleKey](#exporting.buttons.contextButton.titleKey) instead.
-		             *
-		             * @deprecated
-		             * @type      {string}
-		             * @apioption exporting.buttons.contextButton._titleKey
-		             */
+		            _titleKey: 'contextButtonTitle',
 
 		            /**
 		             * A collection of strings pointing to config options for the menu
@@ -920,6 +910,7 @@
 
 		        svg = svg
 		            .replace(/zIndex="[^"]+"/g, '')
+		            .replace(/isShadow="[^"]+"/g, '')
 		            .replace(/symbolName="[^"]+"/g, '')
 		            .replace(/jQuery[0-9]+="[^"]+"/g, '')
 		            .replace(/url\(("|&quot;)(\S+)("|&quot;)\)/g, 'url($2)')
@@ -931,7 +922,7 @@
 		            .replace(/ (|NS[0-9]+\:)href=/g, ' xlink:href=') // #3567
 		            .replace(/\n/, ' ')
 		            // Any HTML added to the container after the SVG (#894)
-		            .replace(/<\/svg>(?!.*<\/svg>).*$/, '</svg>')
+		            .replace(/<\/svg>.*?$/, '</svg>')
 		            // Batik doesn't support rgba fills and strokes (#3095)
 		            .replace(
 		                /(fill|stroke)="rgba\(([ 0-9]+,[ 0-9]+,[ 0-9]+),([ 0-9\.]+)\)"/g, // eslint-disable-line max-len
@@ -1218,37 +1209,33 @@
 		        // pull out the chart
 		        body.appendChild(container);
 
-		        // Give the browser time to draw WebGL content, an issue that randomly
-		        // appears (at least) in Chrome ~67 on the Mac (#8708).
+		        // print
+		        win.focus(); // #1510
+		        win.print();
+
+		        // allow the browser to prepare before reverting
 		        setTimeout(function () {
 
-		            win.focus(); // #1510
-		            win.print();
+		            // put the chart back in
+		            origParent.appendChild(container);
 
-		            // allow the browser to prepare before reverting
-		            setTimeout(function () {
-
-		                // put the chart back in
-		                origParent.appendChild(container);
-
-		                // restore all body content
-		                each(childNodes, function (node, i) {
-		                    if (node.nodeType === 1) {
-		                        node.style.display = origDisplay[i];
-		                    }
-		                });
-
-		                chart.isPrinting = false;
-
-		                // Reset printMaxWidth
-		                if (handleMaxWidth) {
-		                    chart.setSize.apply(chart, resetParams);
+		            // restore all body content
+		            each(childNodes, function (node, i) {
+		                if (node.nodeType === 1) {
+		                    node.style.display = origDisplay[i];
 		                }
+		            });
 
-		                fireEvent(chart, 'afterPrint');
+		            chart.isPrinting = false;
 
-		            }, 1000);
-		        }, 1);
+		            // Reset printMaxWidth
+		            if (handleMaxWidth) {
+		                chart.setSize.apply(chart, resetParams);
+		            }
+
+		            fireEvent(chart, 'afterPrint');
+
+		        }, 1000);
 
 		    },
 
@@ -1273,14 +1260,14 @@
 		            menu = chart[cacheName],
 		            menuPadding = Math.max(width, height), // for mouse leave detection
 		            innerMenu,
+		            hide,
 		            menuStyle;
 
 		        // create the menu only the first time
 		        if (!menu) {
 
 		            // create a HTML element above the SVG
-		            chart.exportContextMenu = chart[cacheName] = menu =
-		            createElement('div', {
+		            chart[cacheName] = menu = createElement('div', {
 		                className: className
 		            }, {
 		                position: 'absolute',
@@ -1306,19 +1293,18 @@
             
 
 		            // hide on mouse out
-		            menu.hideMenu = function () {
+		            hide = function () {
 		                css(menu, { display: 'none' });
 		                if (button) {
 		                    button.setState(0);
 		                }
 		                chart.openMenu = false;
-		                H.clearTimeout(menu.hideTimer);
 		            };
 
 		            // Hide the menu some time after mouse leave (#1357)
 		            chart.exportEvents.push(
 		                addEvent(menu, 'mouseleave', function () {
-		                    menu.hideTimer = setTimeout(menu.hideMenu, 500);
+		                    menu.hideTimer = setTimeout(hide, 500);
 		                }),
 		                addEvent(menu, 'mouseenter', function () {
 		                    H.clearTimeout(menu.hideTimer);
@@ -1328,13 +1314,13 @@
 		                // #2335, #2407)
 		                addEvent(doc, 'mouseup', function (e) {
 		                    if (!chart.pointer.inClass(e.target, className)) {
-		                        menu.hideMenu();
+		                        hide();
 		                    }
 		                }),
 
 		                addEvent(menu, 'click', function () {
 		                    if (chart.openMenu) {
-		                        menu.hideMenu();
+		                        hide();
 		                    }
 		                })
 		            );
@@ -1359,7 +1345,7 @@
 		                                if (e) { // IE7
 		                                    e.stopPropagation();
 		                                }
-		                                menu.hideMenu();
+		                                hide();
 		                                if (item.onclick) {
 		                                    item.onclick.apply(chart, arguments);
 		                                }
@@ -1457,19 +1443,12 @@
 
 		        if (onclick) {
 		            callback = function (e) {
-		                if (e) {
-		                    e.stopPropagation();
-		                }
+		                e.stopPropagation();
 		                onclick.call(chart, e);
 		            };
 
 		        } else if (menuItems) {
-		            callback = function (e) {
-		                // consistent with onclick call (#3495)
-		                if (e) {
-		                    e.stopPropagation();
-		                }
-
+		            callback = function () {
 		                chart.contextMenu(
 		                    button.menuClassName,
 		                    menuItems,
@@ -1502,12 +1481,7 @@
                 
 		                'stroke-linecap': 'round',
                 
-		                title: pick(
-		                    chart.options.lang[
-		                        btnOptions._titleKey || btnOptions.titleKey
-		                    ],
-		                    ''
-		                )
+		                title: pick(chart.options.lang[btnOptions._titleKey], '')
 		            });
 		        button.menuClassName = (
 		            options.menuClassName ||

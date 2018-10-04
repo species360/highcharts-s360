@@ -30,11 +30,7 @@ function stopEvent(e) {
 /**
  * The MapNavigation handles buttons for navigation in addition to mousewheel
  * and doubleclick handlers for chart zooming.
- *
- * @class Highcharts.MapNavigation
- *
- * @param {Highcharts.Chart} chart
- *        The Chart instance.
+ * @param {Chart} chart The Chart instance.
  */
 function MapNavigation(chart) {
     this.init(chart);
@@ -42,13 +38,7 @@ function MapNavigation(chart) {
 
 /**
  * Initiator function.
- *
- * @function Highcharts.MapNavigation#init
- *
- * @param  {Highcharts.Chart} chart
- *         The Chart instance.
- *
- * @return {void}
+ * @param  {Chart} chart The Chart instance.
  */
 MapNavigation.prototype.init = function (chart) {
     this.chart = chart;
@@ -58,13 +48,7 @@ MapNavigation.prototype.init = function (chart) {
 /**
  * Update the map navigation with new options. Calling this is the same as
  * calling `chart.update({ mapNavigation: {} })`.
- *
- * @function Highcharts.MapNavigation#update
- *
- * @param  {Highcharts.MapNavigationOptions} options
- *         New options for the map navigation.
- *
- * @return {void}
+ * @param  {Object} options New options for the map navigation.
  */
 MapNavigation.prototype.update = function (options) {
     var chart = this.chart,
@@ -142,13 +126,7 @@ MapNavigation.prototype.update = function (options) {
 /**
  * Update events, called internally from the update function. Add new event
  * handlers, or unbinds events if disabled.
- *
- * @function Highcharts.MapNavigation#updateEvents
- *
- * @param  {Highcharts.MapNavigationOptions} options
- *         Options for map navigation.
- *
- * @return {void}
+ * @param  {Object} options Options for map navigation.
  */
 MapNavigation.prototype.updateEvents = function (options) {
     var chart = this.chart;
@@ -199,15 +177,7 @@ extend(Chart.prototype, /** @lends Chart.prototype */ {
      * within the outer. This is a pattern that occurs more places in
      * Highcharts, perhaps it should be elevated to a common utility function.
      *
-     * @ignore
-     * @function Highcharts.Chart#fitToBox
-     *
-     * @param  {Highcharts.BBoxObject} inner
-     *
-     * @param  {Highcharts.BBoxObject} outer
-     *
-     * @return {Highcharts.BBoxObject}
-     *         The inner box
+     * @private
      */
     fitToBox: function (inner, outer) {
         each([['x', 'width'], ['y', 'height']], function (dim) {
@@ -240,28 +210,20 @@ extend(Chart.prototype, /** @lends Chart.prototype */ {
      * See {@link Chart#fromLatLonToPoint} for how to get the `centerX` and
      * `centerY` parameters for a geographic location.
      *
-     * @function Highcharts.Chart#mapZoom
-     *
-     * @param  {number|undefined} [howMuch]
+     * @param  {Number} [howMuch]
      *         How much to zoom the map. Values less than 1 zooms in. 0.5 zooms
      *         in to half the current view. 2 zooms to twice the current view.
      *         If omitted, the zoom is reset.
-     *
-     * @param  {number|undefined} [centerX]
+     * @param  {Number} [centerX]
      *         The X axis position to center around if available space.
-     *
-     * @param  {number|undefined} [centerY]
+     * @param  {Number} [centerY]
      *         The Y axis position to center around if available space.
-     *
-     * @param  {number|undefined} [mouseX]
+     * @param  {Number} [mouseX]
      *         Fix the zoom to this position if possible. This is used for
      *         example in mousewheel events, where the area under the mouse
      *         should be fixed as we zoom in.
-     *
-     * @param  {number|undefined} [mouseY]
+     * @param  {Number} [mouseY]
      *         Fix the zoom to this position if possible.
-     *
-     * @return {void}
      */
     mapZoom: function (howMuch, centerXArg, centerYArg, mouseX, mouseY) {
         var chart = this,
@@ -337,7 +299,7 @@ extend(Chart.prototype, /** @lends Chart.prototype */ {
     }
 });
 
-/*
+/**
  * Extend the Chart.render method to add zooming and panning
  */
 addEvent(Chart, 'beforeRender', function () {

@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v6.1.4-modified (2018-10-01)
+ * @license Highcharts JS v6.1.1 (2018-10-04)
  *
  * (c) 2009-2016 Torstein Honsi
  *
@@ -219,7 +219,7 @@
 		         */
 
 		        /**
-		         * The shape of the pane background. When `solid`, the background
+		         * Tha shape of the pane background. When `solid`, the background
 		         * is circular. When `arc`, the background extends only from the min
 		         * to the max of the value axis.
 		         *
@@ -719,10 +719,9 @@
 		            // Concentric circles
 		            } else if (axis.options.gridLineInterpolation === 'circle') {
 		                value = axis.translate(value);
-
-		                // a value of 0 is in the center, so it won't be visible,
-		                // but draw it anyway for update and animation (#2366)
-		                ret = axis.getLinePath(0, value);
+		                if (value) { // a value of 0 is in the center
+		                    ret = axis.getLinePath(0, value);
+		                }
 		            // Concentric polygons
 		            } else {
 		                // Find the X axis in the same pane
@@ -1595,8 +1594,8 @@
 		 *     ]
 		 *  ```
 		 *
-		 * 2.  An array of objects with named values. The following snippet shows only a
-		 * few settings, see the complete options set below. If the total number of data
+		 * 2.  An array of objects with named values. The objects are point
+		 * configuration objects as seen below. If the total number of data
 		 * points exceeds the series'
 		 * [turboThreshold](#series.arearange.turboThreshold),
 		 * this option is not available.
@@ -1716,8 +1715,8 @@
 		 *     ]
 		 *  ```
 		 *
-		 * 2.  An array of objects with named values. The following snippet shows only a
-		 * few settings, see the complete options set below. If the total number of data
+		 * 2.  An array of objects with named values. The objects are point
+		 * configuration objects as seen below. If the total number of data
 		 * points exceeds the series' [turboThreshold](
 		 * #series.areasplinerange.turboThreshold), this option is not available.
 		 *
@@ -1966,8 +1965,8 @@
 		 *     ]
 		 *  ```
 		 *
-		 * 2.  An array of objects with named values. The following snippet shows only a
-		 * few settings, see the complete options set below. If the total number of data
+		 * 2.  An array of objects with named values. The objects are point
+		 * configuration objects as seen below. If the total number of data
 		 * points exceeds the series' [turboThreshold](
 		 * #series.columnrange.turboThreshold), this option is not available.
 		 *
@@ -2489,8 +2488,8 @@
 		 *  data: [0, 5, 3, 5]
 		 *  ```
 		 *
-		 * 2.  An array of objects with named values. The following snippet shows only a
-		 * few settings, see the complete options set below. If the total number of data
+		 * 2.  An array of objects with named values. The objects are point
+		 * configuration objects as seen below. If the total number of data
 		 * points exceeds the series' [turboThreshold](#series.gauge.turboThreshold),
 		 * this option is not available.
 		 *
@@ -2819,8 +2818,8 @@
 		 *     ]
 		 *  ```
 		 *
-		 * 2.  An array of objects with named values. The following snippet shows only a
-		 * few settings, see the complete options set below. If the total number of data
+		 * 2.  An array of objects with named values. The objects are point
+		 * configuration objects as seen below. If the total number of data
 		 * points exceeds the series' [turboThreshold](#series.boxplot.turboThreshold),
 		 * this option is not available.
 		 *
@@ -2925,9 +2924,7 @@
 		 * measurement.
 		 *
 		 * @sample       highcharts/demo/error-bar/
-		 *               Error bars on a column series
-		 * @sample       highcharts/series-errorbar/on-scatter/
-		 *               Error bars on a scatter series
+		 *               Error bars
 		 * @extends      {plotOptions.boxplot}
 		 * @product      highcharts highstock
 		 * @optionparent plotOptions.errorbar
@@ -3025,8 +3022,8 @@
 		 *     ]
 		 *  ```
 		 *
-		 * 2.  An array of objects with named values. The following snippet shows only a
-		 * few settings, see the complete options set below. If the total number of data
+		 * 2.  An array of objects with named values. The objects are point
+		 * configuration objects as seen below. If the total number of data
 		 * points exceeds the series' [turboThreshold](#series.errorbar.turboThreshold),
 		 * this option is not available.
 		 *
@@ -3233,8 +3230,6 @@
 		                previousY += stack && stack[point.x] ?
 		                    stack[point.x].total :
 		                    yValue;
-
-		                point.below = previousY < pick(threshold, 0);
 		            }
 
 		            // #3952 Negative sum or intermediate sum not rendered correctly
@@ -3259,9 +3254,6 @@
 		                    point.minPointLengthOffset = halfMinPointLength;
 		                }
 		            } else {
-		                if (point.isNull) {
-		                    shapeArgs.width = 0;
-		                }
 		                point.minPointLengthOffset = 0;
 		            }
 
@@ -3392,7 +3384,7 @@
 		    },
 
 		    /**
-		     * The graph is initially drawn with an empty definition, then updated with
+		     * The graph is initally drawn with an empty definition, then updated with
 		     * crisp rendering.
 		     */
 		    drawGraph: function () {
@@ -3496,8 +3488,8 @@
 		 *     ]
 		 *  ```
 		 *
-		 * 3.  An array of objects with named values. The following snippet shows only a
-		 * few settings, see the complete options set below. If the total number of data
+		 * 3.  An array of objects with named values. The objects are point
+		 * configuration objects as seen below. If the total number of data
 		 * points exceeds the series'
 		 * [turboThreshold](#series.waterfall.turboThreshold),
 		 * this option is not available.
@@ -3666,8 +3658,8 @@
 		 *     ]
 		 *  ```
 		 *
-		 * 3.  An array of objects with named values. The following snippet shows only a
-		 * few settings, see the complete options set below. If the total number of data
+		 * 3.  An array of objects with named values. The objects are point
+		 * configuration objects as seen below. If the total number of data
 		 * points exceeds the series' [turboThreshold](#series.polygon.turboThreshold),
 		 * this option is not available.
 		 *
@@ -4225,14 +4217,9 @@
 		        }
 		    });
 
-		    // Apply the padding to the min and max properties
 		    if (activeSeries.length && range > 0 && !this.isLog) {
 		        pxMax -= axisLength;
-		        transA *= (
-		            axisLength +
-		            Math.max(0, pxMin) - // #8901
-		            Math.min(pxMax, axisLength)
-		        ) / axisLength;
+		        transA *= (axisLength + pxMin - pxMax) / axisLength;
 		        each(
 		            [['min', 'userMin', pxMin], ['max', 'userMax', pxMax]],
 		            function (keys) {
@@ -4276,8 +4263,8 @@
 		 *     ]
 		 *  ```
 		 *
-		 * 2.  An array of objects with named values. The following snippet shows only a
-		 * few settings, see the complete options set below. If the total number of data
+		 * 2.  An array of objects with named values. The objects are point
+		 * configuration objects as seen below. If the total number of data
 		 * points exceeds the series' [turboThreshold](#series.bubble.turboThreshold),
 		 * this option is not available.
 		 *

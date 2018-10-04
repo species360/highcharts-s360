@@ -1,5 +1,5 @@
 /*
-  Highcharts JS v6.1.4-modified (2018-10-01)
+  Highcharts JS v6.1.1 (2018-10-04)
 
  Item series type for Highcharts
 
@@ -7,7 +7,6 @@
 
  License: www.highcharts.com/license
 */
-(function(b){"object"===typeof module&&module.exports?module.exports=b:"function"===typeof define&&define.amd?define(function(){return b}):b(Highcharts)})(function(b){(function(d){var b=d.each,x=d.extend,u=d.pick,q=d.seriesType;q("item","column",{itemPadding:.2,marker:{symbol:"circle",states:{hover:{},select:{}}}},{drawPoints:function(){var c=this,h=c.chart.renderer,k=this.options.marker,l=this.yAxis.transA*c.options.itemPadding,m=this.borderWidth%2?.5:1;b(this.points,function(a){var b,e,f,g,r;b=
-a.marker||{};var v=b.symbol||k.symbol,q=u(b.radius,k.radius),n,t,w="rect"!==v,p;a.graphics=f=a.graphics||{};r=a.pointAttr?a.pointAttr[a.selected?"selected":""]||c.pointAttr[""]:c.pointAttribs(a,a.selected&&"select");delete r.r;if(null!==a.y)for(a.graphic||(a.graphic=h.g("point").add(c.group)),g=a.y,t=u(a.stackY,a.y),n=Math.min(a.pointWidth,c.yAxis.transA-l),b=t;b>t-a.y;b--)e=a.barX+(w?a.pointWidth/2-n/2:0),p=c.yAxis.toPixels(b,!0)+l/2,c.options.crisp&&(e=Math.round(e)-m,p=Math.round(p)+m),e={x:e,
-y:p,width:Math.round(w?n:a.pointWidth),height:Math.round(n),r:q},f[g]?f[g].animate(e):f[g]=h.symbol(v).attr(x(e,r)).add(a.graphic),f[g].isActive=!0,g--;d.objectEach(f,function(a,b){a.isActive?a.isActive=!1:(a.destroy(),delete a[b])})})}});d.SVGRenderer.prototype.symbols.rect=function(b,h,k,l,m){return d.SVGRenderer.prototype.symbols.callout(b,h,k,l,m)}})(b)});
-//# sourceMappingURL=item-series.js.map
+(function(b){"object"===typeof module&&module.exports?module.exports=b:"function"===typeof define&&define.amd?define(function(){return b}):b(Highcharts)})(function(b){(function(b){var h=b.each,q=b.extend,r=b.pick,k=b.seriesType;k("item","column",{itemPadding:.2,marker:{symbol:"circle",states:{hover:{},select:{}}}},{drawPoints:function(){var c=this,p=c.chart.renderer,k=this.options.marker;h(this.points,function(a){var g,l,d,e,m,h=(a.marker||{}).symbol||k.symbol,f,n;a.graphics=d=a.graphics||{};m=a.pointAttr?
+a.pointAttr[a.selected?"selected":""]||c.pointAttr[""]:c.pointAttribs(a,a.selected&&"select");delete m.r;if(null!==a.y)for(a.graphic||(a.graphic=p.g("point").add(c.group)),e=a.y,n=r(a.stackY,a.y),f=Math.min(a.pointWidth,c.yAxis.transA*(1-c.options.itemPadding)),g=n;g>n-a.y;g--)l={x:a.barX+a.pointWidth/2-f/2,y:c.yAxis.toPixels(g,!0)-f/2,width:f,height:f},d[e]?d[e].animate(l):d[e]=p.symbol(h).attr(q(l,m)).add(a.graphic),d[e].isActive=!0,e--;b.objectEach(d,function(a,b){a.isActive?a.isActive=!1:(a.destroy(),
+delete a[b])})})}})})(b)});

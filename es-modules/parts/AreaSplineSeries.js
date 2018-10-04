@@ -3,84 +3,48 @@
  *
  * License: www.highcharts.com/license
  */
-
 'use strict';
-
 import H from './Globals.js';
 import './Utilities.js';
 import './Legend.js';
 import './AreaSeries.js';
 import './SplineSeries.js';
-
 var areaProto = H.seriesTypes.area.prototype,
     defaultPlotOptions = H.defaultPlotOptions,
     LegendSymbolMixin = H.LegendSymbolMixin,
     seriesType = H.seriesType;
-
 /**
- * AreaSpline series type.
- *
- * @private
- * @class
- * @name Highcharts.seriesTypes.areaspline
- *
- * @augments Highcharts.Series
+ * AreaSplineSeries object
  */
-seriesType('areaspline', 'spline',
-
-    /**
-     * The area spline series is an area series where the graph between the
-     * points is smoothed into a spline.
-     *
-     * @sample {highcharts} highcharts/demo/areaspline/
-     *         Area spline chart
-     * @sample {highstock} stock/demo/areaspline/
-     *         Area spline chart
-     *
-     * @extends   plotOptions.area
-     * @excluding step
-     * @product   highcharts highstock
-     * @apioption plotOptions.areaspline
-     */
-    defaultPlotOptions.area
-, {
-
-    /**
-     * @private
-     * @function Highcharts.seriesTypes.areaspline#getStackPoints
-     */
+/**
+ * The area spline series is an area series where the graph between the points
+ * is smoothed into a spline.
+ *
+ * @extends   plotOptions.area
+ * @excluding step
+ * @sample    {highcharts} highcharts/demo/areaspline/ Area spline chart
+ * @sample    {highstock} stock/demo/areaspline/ Area spline chart
+ * @product   highcharts highstock
+ * @apioption plotOptions.areaspline
+ */
+seriesType('areaspline', 'spline', defaultPlotOptions.area, {
     getStackPoints: areaProto.getStackPoints,
-
-    /**
-     * @private
-     * @function Highcharts.seriesTypes.areaspline#getGraphPath
-     */
     getGraphPath: areaProto.getGraphPath,
-
-    /**
-     * @private
-     * @function Highcharts.seriesTypes.areaspline#drawGraph
-     */
     drawGraph: areaProto.drawGraph,
-
-    /**
-     * @private
-     * @borrows Highcharts.LegendSymbolMixin#drawRectangle as Highcharts.seriesTypes.areaspline#drawLegendSymbol
-     */
     drawLegendSymbol: LegendSymbolMixin.drawRectangle
-
 });
-
 /**
  * A `areaspline` series. If the [type](#series.areaspline.type) option
  * is not specified, it is inherited from [chart.type](#chart.type).
  *
  *
+ * @type      {Object}
  * @extends   series,plotOptions.areaspline
- * @excluding dataParser, dataURL
+ * @excluding dataParser,dataURL
  * @product   highcharts highstock
  * @apioption series.areaspline
  */
+
 
 /**
  * An array of data points for the series. For the `areaspline` series
@@ -108,8 +72,8 @@ seriesType('areaspline', 'spline',
  *     ]
  *  ```
  *
- * 3.  An array of objects with named values. The following snippet shows only a
- * few settings, see the complete options set below. If the total number of data
+ * 3.  An array of objects with named values. The objects are point
+ * configuration objects as seen below. If the total number of data
  * points exceeds the series'
  * [turboThreshold](#series.areaspline.turboThreshold), this option is not
  * available.
@@ -128,19 +92,18 @@ seriesType('areaspline', 'spline',
  *     }]
  *  ```
  *
- * @sample {highcharts} highcharts/chart/reflow-true/
- *         Numerical values
- * @sample {highcharts} highcharts/series/data-array-of-arrays/
- *         Arrays of numeric x and y
- * @sample {highcharts} highcharts/series/data-array-of-arrays-datetime/
- *         Arrays of datetime x and y
- * @sample {highcharts} highcharts/series/data-array-of-name-value/
- *         Arrays of point.name and y
- * @sample {highcharts} highcharts/series/data-array-of-objects/
- *         Config objects
- *
- * @type      {Array<number|Array<number|string|Date>|*>}
+ * @type      {Array<Object|Array|Number>}
  * @extends   series.line.data
+ * @sample    {highcharts} highcharts/chart/reflow-true/
+ *            Numerical values
+ * @sample    {highcharts} highcharts/series/data-array-of-arrays/
+ *            Arrays of numeric x and y
+ * @sample    {highcharts} highcharts/series/data-array-of-arrays-datetime/
+ *            Arrays of datetime x and y
+ * @sample    {highcharts} highcharts/series/data-array-of-name-value/
+ *            Arrays of point.name and y
+ * @sample    {highcharts} highcharts/series/data-array-of-objects/
+ *            Config objects
  * @product   highcharts highstock
  * @apioption series.areaspline.data
  */

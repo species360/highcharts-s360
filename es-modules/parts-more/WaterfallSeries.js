@@ -237,8 +237,6 @@ seriesType('waterfall', 'column', {
                 previousY += stack && stack[point.x] ?
                     stack[point.x].total :
                     yValue;
-
-                point.below = previousY < pick(threshold, 0);
             }
 
             // #3952 Negative sum or intermediate sum not rendered correctly
@@ -263,9 +261,6 @@ seriesType('waterfall', 'column', {
                     point.minPointLengthOffset = halfMinPointLength;
                 }
             } else {
-                if (point.isNull) {
-                    shapeArgs.width = 0;
-                }
                 point.minPointLengthOffset = 0;
             }
 
@@ -422,7 +417,7 @@ seriesType('waterfall', 'column', {
     },
 
     /**
-     * The graph is initially drawn with an empty definition, then updated with
+     * The graph is initally drawn with an empty definition, then updated with
      * crisp rendering.
      */
     drawGraph: function () {
@@ -526,8 +521,8 @@ seriesType('waterfall', 'column', {
  *     ]
  *  ```
  *
- * 3.  An array of objects with named values. The following snippet shows only a
- * few settings, see the complete options set below. If the total number of data
+ * 3.  An array of objects with named values. The objects are point
+ * configuration objects as seen below. If the total number of data
  * points exceeds the series'
  * [turboThreshold](#series.waterfall.turboThreshold),
  * this option is not available.

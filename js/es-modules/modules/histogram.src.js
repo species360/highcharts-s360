@@ -18,8 +18,7 @@ var each = H.each,
     isNumber = H.isNumber,
     arrayMax = H.arrayMax,
     arrayMin = H.arrayMin,
-    merge = H.merge,
-    map = H.map;
+    merge = H.merge;
 
 /* ***************************************************************************
  *
@@ -51,14 +50,21 @@ var binsNumberFormulas = {
  * @param {number} binWidth - width of the bin
  * @returns {function}
  **/
-function fitToBinLeftClosed(bins) {
+function fitToBinLeftClosed(binWidth) {
     return function (y) {
-        var i = 1;
-        while (bins[i] <= y) {
-            i++;
-        }
-        return bins[--i];
+        return Math.floor(y / binWidth) * binWidth;
     };
+}
+
+/**
+ * Identity function - takes a param and returns that param
+ * It is used to grouping data with the same values
+ *
+ * @param {number} y - value
+ * @returns {number}
+ **/
+function identity(y) {
+    return y;
 }
 
 /**
@@ -128,41 +134,33 @@ seriesType('histogram', 'column', {
     derivedData: function (baseData, binsNumber, binWidth) {
         var max = arrayMax(baseData),
             min = arrayMin(baseData),
-            frequencies = [],
-            bins = {},
+            frequencies = {},
             data = [],
             x,
             fitToBin;
 
-        binWidth = this.binWidth = correctFloat(
-            isNumber(binWidth) ?
-                (binWidth || 1) :
-                (max - min) / binsNumber
-        );
+        binWidth = this.binWidth = isNumber(binWidth) ?
+            binWidth :
+            (max - min) / binsNumber;
+
+        fitToBin = binWidth ? fitToBinLeftClosed(binWidth) : identity;
 
         // If binWidth is 0 then max and min are equaled,
         // increment the x with some positive value to quit the loop
-        for (x = min; x < max; x = correctFloat(x + binWidth)) {
-            frequencies.push(x);
-            bins[x] = 0;
+        for (
+            x = fitToBin(min);
+            x <= max;
+            x = correctFloat(x + (binWidth || 1))
+        ) {
+            frequencies[correctFloat(fitToBin((x)))] = 0;
         }
-
-        if (bins[min] !== 0) {
-            frequencies.push(correctFloat(min));
-            bins[correctFloat(min)] = 0;
-        }
-
-        fitToBin = fitToBinLeftClosed(
-            map(frequencies, function (elem) {
-                return parseFloat(elem);
-            }));
 
         each(baseData, function (y) {
             var x = correctFloat(fitToBin(y));
-            bins[x]++;
+            frequencies[x]++;
         });
 
-        objectEach(bins, function (frequency, x) {
+        objectEach(frequencies, function (frequency, x) {
             data.push({
                 x: Number(x),
                 y: frequency,

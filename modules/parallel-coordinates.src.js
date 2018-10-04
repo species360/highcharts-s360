@@ -1,5 +1,5 @@
 /**
- * @license  Highcharts JS v6.1.4-modified (2018-10-01)
+ * @license  Highcharts JS v6.1.1 (2018-10-04)
  *
  * Support for parallel coordinates in Highcharts
  *
@@ -99,7 +99,7 @@
 		     *    offset: 0
 		     * }</pre>
 		     *
-		     * @extends yAxis
+		     * @extends {yAxis}
 		     * @excluding alternateGridColor,breaks,id,gridLineColor,gridLineDashStyle,
 		     *            gridLineWidth,minorGridLineColor,minorGridLineDashStyle,
 		     *            minorGridLineWidth,plotBands,plotLines,angle,

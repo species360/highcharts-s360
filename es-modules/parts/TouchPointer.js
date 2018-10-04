@@ -3,12 +3,9 @@
  *
  * License: www.highcharts.com/license
  */
-
 'use strict';
-
 import H from './Globals.js';
 import './Utilities.js';
-
 var charts = H.charts,
     each = H.each,
     extend = H.extend,
@@ -17,26 +14,11 @@ var charts = H.charts,
     pick = H.pick,
     Pointer = H.Pointer;
 
-// Support for touch devices
+/* Support for touch devices */
 extend(Pointer.prototype, /** @lends Pointer.prototype */ {
 
     /**
      * Run translation operations
-     *
-     * @private
-     * @function Highcharts.Pointer#pinchTranslate
-     *
-     * @param {Array<*>} pinchDown
-     *
-     * @param {Array<*>} touches
-     *
-     * @param {*} transform
-     *
-     * @param {*} selectionMarker
-     *
-     * @param {*} clip
-     *
-     * @param {*} lastValidTouch
      */
     pinchTranslate: function (
         pinchDown,
@@ -72,26 +54,7 @@ extend(Pointer.prototype, /** @lends Pointer.prototype */ {
 
     /**
      * Run translation operations for each direction (horizontal and vertical)
-     * independently.
-     *
-     * @private
-     * @function Highcharts.Pointer#pinchTranslateDirection
-     *
-     * @param {boolean} horiz
-     *
-     * @param {Array<*>} pinchDown
-     *
-     * @param {Array<*>} touches
-     *
-     * @param {*} transform
-     *
-     * @param {*} selectionMarker
-     *
-     * @param {*} clip
-     *
-     * @param {*} lastValidTouch
-     *
-     * @param {number|undefined} [forcedScale=1]
+     * independently
      */
     pinchTranslateDirection: function (horiz, pinchDown, touches, transform,
             selectionMarker, clip, lastValidTouch, forcedScale) {
@@ -181,11 +144,6 @@ extend(Pointer.prototype, /** @lends Pointer.prototype */ {
 
     /**
      * Handle touch events with two touches
-     *
-     * @private
-     * @function Highcharts.Pointer#pinch
-     *
-     * @param {Highcharts.PointerEvent} e
      */
     pinch: function (e) {
 
@@ -300,13 +258,6 @@ extend(Pointer.prototype, /** @lends Pointer.prototype */ {
 
     /**
      * General touch handler shared by touchstart and touchmove.
-     *
-     * @private
-     * @function Highcharts.Pointer#touch
-     *
-     * @param {Highcharts.PointerEvent} e
-     *
-     * @param {boolean} start
      */
     touch: function (e, start) {
         var chart = this.chart,
@@ -362,33 +313,15 @@ extend(Pointer.prototype, /** @lends Pointer.prototype */ {
         }
     },
 
-    /**
-     * @private
-     * @function Highcharts.Pointer#onContainerTouchStart
-     *
-     * @param {Highcharts.PointerEvent} e
-     */
     onContainerTouchStart: function (e) {
         this.zoomOption(e);
         this.touch(e, true);
     },
 
-    /**
-     * @private
-     * @function Highcharts.Pointer#onContainerTouchMove
-     *
-     * @param {Highcharts.PointerEvent} e
-     */
     onContainerTouchMove: function (e) {
         this.touch(e);
     },
 
-    /**
-     * @private
-     * @function Highcharts.Pointer#onDocumentTouchEnd
-     *
-     * @param {Highcharts.PointerEvent} e
-     */
     onDocumentTouchEnd: function (e) {
         if (charts[H.hoverChartIndex]) {
             charts[H.hoverChartIndex].pointer.drop(e);

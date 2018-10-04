@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v6.1.4-modified (2018-10-01)
+ * @license Highcharts JS v6.1.1 (2018-10-04)
  *
  * 3D features for Highcharts JS
  *
@@ -749,8 +749,8 @@
 
 		    attribs = merge(attribs);
 
-		    attribs.alpha = (attribs.alpha || 0) * deg2rad;
-		    attribs.beta = (attribs.beta || 0) * deg2rad;
+		    attribs.alpha *= deg2rad;
+		    attribs.beta *= deg2rad;
 
 		    // Create the different sub sections of the shape
 		    wrapper.top = renderer.path();
@@ -868,8 +868,7 @@
 		        var ca,
 		            from = this.attribs,
 		            to,
-		            anim,
-		            randomProp = 'data-' + Math.random().toString(26).substring(2, 9);
+		            anim;
 
 		        // Attribute-line properties connected to 3D. These shouldn't have been
 		        // in the attribs collection in the first place.
@@ -884,10 +883,8 @@
 		        if (anim.duration) {
 		            ca = suckOutCustom(params);
 		            // Params need to have a property in order for the step to run
-		            // (#5765, #7097, #7437)
-		            wrapper[randomProp] = 0;
-		            params[randomProp] = 1;
-		            wrapper[randomProp + 'Setter'] = H.noop;
+		            // (#5765, #7437)
+		            params.dummy = wrapper.dummy++;
 
 		            if (ca) {
 		                to = ca;
@@ -897,7 +894,7 @@
 		                            (pick(to[key], from[key]) - from[key]) * fx.pos;
 		                    }
 
-		                    if (fx.prop === randomProp) {
+		                    if (fx.prop === 'dummy') {
 		                        fx.elem.setPaths(merge(from, {
 		                            x: interpolate('x'),
 		                            y: interpolate('y'),
@@ -913,6 +910,7 @@
 		        }
 		        return proceed.call(this, params, animation, complete);
 		    });
+		    wrapper.dummy = 0;
 
 		    // destroy all children
 		    wrapper.destroy = function () {
@@ -951,8 +949,8 @@
 		        start = shapeArgs.start, // start angle
 		        end = shapeArgs.end - 0.00001, // end angle
 		        r = shapeArgs.r, // radius
-		        ir = shapeArgs.innerR || 0, // inner radius
-		        d = shapeArgs.depth || 0, // depth
+		        ir = shapeArgs.innerR, // inner radius
+		        d = shapeArgs.depth, // depth
 		        alpha = shapeArgs.alpha, // alpha rotation of the chart
 		        beta = shapeArgs.beta; // beta rotation of the chart
 
@@ -976,7 +974,6 @@
 		    ]);
 		    top = top.concat(curveTo(cx, cy, irx, iry, end, start, 0, 0));
 		    top = top.concat(['Z']);
-
 		    // OUTSIDE
 		    var b = (beta > 0 ? Math.PI / 2 : 0),
 		        a = (alpha > 0 ? 0 : Math.PI / 2);
@@ -1162,7 +1159,7 @@
 		    var options = this.options;
 
 		    if (this.is3d()) {
-		        each(options.series || [], function (s) {
+		        each(options.series, function (s) {
 		            var type = s.type ||
 		                options.chart.type ||
 		                options.chart.defaultSeriesType;
@@ -1390,10 +1387,11 @@
 		             *
 		             * @validvalue [null, "auto"]
 		             * @type {String}
+		             * @default null
 		             * @since 5.0.12
 		             * @product highcharts
 		             */
-		            axisLabelPosition: null,
+		            axisLabelPosition: 'default',
 
 		            /**
 		             * Provides the option to draw a frame around the charts by defining
@@ -1464,35 +1462,35 @@
 		                /**
 		                 * The top of the frame around a 3D chart.
 		                 *
-		                 * @extends chart.options3d.frame.bottom
+		                 * @extends {chart.options3d.frame.bottom}
 		                 */
 		                top: {},
 
 		                /**
 		                 * The left side of the frame around a 3D chart.
 		                 *
-		                 * @extends chart.options3d.frame.bottom
+		                 * @extends {chart.options3d.frame.bottom}
 		                 */
 		                left: {},
 
 		                /**
 		                 * The right of the frame around a 3D chart.
 		                 *
-		                 * @extends chart.options3d.frame.bottom
+		                 * @extends {chart.options3d.frame.bottom}
 		                 */
 		                right: {},
 
 		                /**
 		                 * The back side of the frame around a 3D chart.
 		                 *
-		                 * @extends chart.options3d.frame.bottom
+		                 * @extends {chart.options3d.frame.bottom}
 		                 */
 		                back: {},
 
 		                /**
 		                 * The front of the frame around a 3D chart.
 		                 *
-		                 * @extends chart.options3d.frame.bottom
+		                 * @extends {chart.options3d.frame.bottom}
 		                 */
 		                front: {}
 		            }
@@ -3406,8 +3404,7 @@
 		    if (this.chart.is3d() &&
 		        tick &&
 		        tick.label &&
-		        this.categories &&
-		        this.chart.frameShapes
+		        this.categories
 		    ) {
 		        var chart = this.chart,
 		            ticks = this.ticks,
@@ -3431,7 +3428,7 @@
 
 		        // Check whether the tick is not the first one and previous tick exists,
 		        // then calculate position of previous label.
-		        if (tickId !== 0 && prevTick && prevTick.label.xy) { // #8621
+		        if (tickId !== 0 && prevTick) {
 		            prevLabelPos = perspective3D({
 		                x: prevTick.label.xy.x,
 		                y: prevTick.label.xy.y,
@@ -4216,7 +4213,7 @@
 		 * @sample {highcharts} highcharts/demo/3d-scatter-draggable
 		 *         Draggable 3d scatter
 		 *
-		 * @extends plotOptions.scatter
+		 * @extends {plotOptions.scatter}
 		 * @product highcharts
 		 * @optionparent plotOptions.scatter3d
 		 */
@@ -4287,8 +4284,8 @@
 		 *     ]
 		 *  ```
 		 *
-		 * 3.  An array of objects with named values. The following snippet shows only a
-		 * few settings, see the complete options set below. If the total number of data
+		 * 3.  An array of objects with named values. The objects are point
+		 * configuration objects as seen below. If the total number of data
 		 * points exceeds the series'
 		 * [turboThreshold](#series.scatter3d.turboThreshold), this option is not
 		 * available.

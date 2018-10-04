@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v6.1.4-modified (2018-10-01)
+ * @license Highcharts JS v6.1.1 (2018-10-04)
  * Accessibility module
  *
  * (c) 2010-2017 Highsoft AS
@@ -1385,29 +1385,6 @@
 
 
 		/**
-		 * Get the index of a point in a series. This is needed when using e.g. data
-		 * grouping.
-		 *
-		 * @param {Point} point The point to find index of.
-		 * @return {number} The index in the series.points array of the point.
-		 */
-		function getPointIndex(point) {
-		    var index = point.index,
-		        points = point.series.points,
-		        i = points.length;
-		    if (points[index] !== point) {
-		        while (i--) {
-		            if (points[i] === point) {
-		                return i;
-		            }
-		        }
-		    } else {
-		        return index;
-		    }
-		}
-
-
-		/**
 		 * Set default keyboard navigation options
 		 */
 		H.setOptions({
@@ -1531,7 +1508,6 @@
 		             * navigation behavior with/without screen readers enabled.
 		             *
 		             * @type      {String}
-		             * @validvalue ["normal", "serialize"]
 		             * @default   normal
 		             * @since     6.0.4
 		             * @apioption accessibility.keyboardNavigation.mode
@@ -1664,25 +1640,17 @@
 		}
 
 
-		// Determine if a series should be skipped
-		function isSkipSeries(series) {
-		    var a11yOptions = series.chart.options.accessibility;
-		    return series.options.skipKeyboardNavigation ||
-		        series.options.enableMouseTracking === false || // #8440
-		        !series.visible ||
-		        // Skip all points in a series where pointDescriptionThreshold is
-		        // reached
-		        (a11yOptions.pointDescriptionThreshold &&
-		        a11yOptions.pointDescriptionThreshold <= series.points.length);
-		}
-
-
 		// Determine if a point should be skipped
 		function isSkipPoint(point) {
 		    var a11yOptions = point.series.chart.options.accessibility;
 		    return point.isNull && a11yOptions.keyboardNavigation.skipNullPoints ||
+		        point.series.options.skipKeyboardNavigation ||
+		        !point.series.visible ||
 		        point.visible === false ||
-		        isSkipSeries(point.series);
+		        // Skip all points in a series where pointDescriptionThreshold is
+		        // reached
+		        (a11yOptions.pointDescriptionThreshold &&
+		        a11yOptions.pointDescriptionThreshold <= point.series.points.length);
 		}
 
 
@@ -1800,7 +1768,7 @@
 		    var chart = this,
 		        series = chart.series,
 		        curPoint = chart.highlightedPoint,
-		        curPointIndex = curPoint && getPointIndex(curPoint) || 0,
+		        curPointIndex = curPoint && curPoint.index || 0,
 		        curPoints = curPoint && curPoint.series.points,
 		        lastSeries = chart.series && chart.series[chart.series.length - 1],
 		        lastPoint = lastSeries && lastSeries.points &&
@@ -1819,13 +1787,23 @@
 		        newPoint = next ? series[0].points[0] : lastPoint;
 		    } else {
 		        // We have a highlighted point.
+		        // Find index of current point in series.points array. Necessary for
+		        // dataGrouping (and maybe zoom?)
+		        if (curPoints[curPointIndex] !== curPoint) {
+		            for (var i = 0; i < curPoints.length; ++i) {
+		                if (curPoints[i] === curPoint) {
+		                    curPointIndex = i;
+		                    break;
+		                }
+		            }
+		        }
+
 		        // Grab next/prev point & series
 		        newSeries = series[curPoint.series.index + (next ? 1 : -1)];
-		        newPoint = curPoints[curPointIndex + (next ? 1 : -1)];
-		        if (!newPoint && newSeries) {
-		            // Done with this series, try next one
-		            newPoint = newSeries.points[next ? 0 : newSeries.points.length - 1];
-		        }
+		        newPoint = curPoints[curPointIndex + (next ? 1 : -1)] ||
+		                    // Done with this series, try next one
+		                    newSeries &&
+		                    newSeries.points[next ? 0 : newSeries.points.length - 1];
 
 		        // If there is no adjacent point, we return false
 		        if (!newPoint) {
@@ -1833,20 +1811,9 @@
 		        }
 		    }
 
-		    // Recursively skip points
+		    // Recursively skip null points or points in series that should be skipped
 		    if (isSkipPoint(newPoint)) {
-		        // If we skip this whole series, move to the end of the series before we
-		        // recurse, just to optimize
-		        newSeries = newPoint.series;
-		        if (isSkipSeries(newSeries)) {
-		            chart.highlightedPoint = next ?
-		                newSeries.points[newSeries.points.length - 1] :
-		                newSeries.points[0];
-		        } else {
-		            // Otherwise, just move one point
-		            chart.highlightedPoint = newPoint;
-		        }
-		        // Retry
+		        chart.highlightedPoint = newPoint;
 		        return chart.highlightAdjacentPoint(next);
 		    }
 
@@ -1860,9 +1827,7 @@
 		// use that as starting point.
 		H.Series.prototype.highlightFirstValidPoint = function () {
 		    var curPoint = this.chart.highlightedPoint,
-		        start = (curPoint && curPoint.series) === this ?
-		            getPointIndex(curPoint) :
-		            0,
+		        start = (curPoint && curPoint.series) === this ? curPoint.index : 0,
 		        points = this.points;
 
 		    if (points) {
@@ -1916,7 +1881,7 @@
 		    }
 
 		    // New series and point exists, but we might want to skip it
-		    if (isSkipSeries(newSeries)) {
+		    if (!newSeries.visible) {
 		        // Skip the series
 		        newPoint.highlight();
 		        adjacentNewPoint = chart.highlightAdjacentSeries(down); // Try recurse
@@ -1945,9 +1910,6 @@
 		        return false;
 		    }
 		    each(this.series, function (series) {
-		        if (isSkipSeries(series)) {
-		            return;
-		        }
 		        each(series.points, function (point) {
 		            if (point.plotY === undefined || point.plotX === undefined ||
 		                point === curPoint) {
@@ -1993,20 +1955,23 @@
 
 		// Hide export menu
 		H.Chart.prototype.hideExportMenu = function () {
-		    var chart = this,
-		        exportList = chart.exportDivElements;
-		    if (exportList && chart.exportContextMenu) {
-		        // Reset hover states etc.
+		    var exportList = this.exportDivElements;
+		    if (exportList) {
 		        each(exportList, function (el) {
-		            if (el.className === 'highcharts-menu-item' && el.onmouseout) {
-		                el.onmouseout();
-		            }
+		            fireEvent(el, 'mouseleave');
 		        });
-		        chart.highlightedExportItem = 0;
-		        // Hide the menu div
-		        chart.exportContextMenu.hideMenu();
-		        // Make sure the chart has focus and can capture keyboard events
-		        chart.container.focus();
+		        if (
+		            exportList[this.highlightedExportItem] &&
+		            exportList[this.highlightedExportItem].onmouseout
+		        ) {
+		            exportList[this.highlightedExportItem].onmouseout();
+		        }
+		        this.highlightedExportItem = 0;
+		        if (hasSVGFocusSupport) {
+		            // Only focus if we can set focus back to the elements after
+		            // destroying the menu (#7422)
+		            this.renderTo.focus();
+		        }
 		    }
 		};
 
@@ -2453,12 +2418,10 @@
 		            }],
 		            // Enter/Spacebar
 		            [[13, 32], function () {
-		                var legendElement = chart.legend.allItems[
-		                        chart.highlightedLegendItemIx
-		                    ].legendItem.element;
 		                fakeClickEvent(
-		                     !chart.legend.options.useHTML ? // #8561
-		                        legendElement.parentNode : legendElement
+		                    chart.legend.allItems[
+		                        chart.highlightedLegendItemIx
+		                    ].legendItem.element.parentNode
 		                );
 		            }]
 		        ], {

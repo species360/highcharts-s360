@@ -3,60 +3,38 @@
  *
  * License: www.highcharts.com/license
  */
-
 'use strict';
-
 import H from './Globals.js';
 import './Utilities.js';
 import './Options.js';
 import './Series.js';
-
 var pick = H.pick,
     seriesType = H.seriesType;
 
 /**
- * Spline series type.
+ * A spline series is a special type of line series, where the segments between
+ * the data points are smoothed.
  *
- * @private
- * @class
- * @name Highcharts.seriesTypes.spline
- *
- * @augments Highcarts.Series
+ * @sample    {highcharts} highcharts/demo/spline-irregular-time/
+ *            Spline chart
+ * @sample    {highstock} stock/demo/spline/
+ *            Spline chart
+ * @extends   plotOptions.series
+ * @excluding step
+ * @product   highcharts highstock
+ * @apioption plotOptions.spline
  */
-seriesType('spline', 'line'
 
 /**
- * A spline series is a special type of line series, where the segments
- * between the data points are smoothed.
+ * Spline series type.
  *
- * @sample {highcharts} highcharts/demo/spline-irregular-time/
- *         Spline chart
- * @sample {highstock} stock/demo/spline/
- *         Spline chart
- *
- * @extends      plotOptions.series
- * @excluding    step
- * @product      highcharts highstock
- * @optionparent plotOptions.spline
+ * @constructor seriesTypes.spline
+ * @extends     {Series}
  */
-, {
-
-}, /** @lends seriesTypes.spline.prototype */ {
-
+seriesType('spline', 'line', {}, /** @lends seriesTypes.spline.prototype */ {
     /**
      * Get the spline segment from a given point's previous neighbour to the
-     * given point.
-     *
-     * @private
-     * @function Highcharts.seriesTypes.spline#getPointSpline
-     *
-     * @param {Array<Highcharts.Point>}
-     *
-     * @param {Highcharts.Point} point
-     *
-     * @param {number} i
-     *
-     * @return {Highcharts.SVGPathArray}
+     * given point
      */
     getPointSpline: function (points, point, i) {
         var
@@ -197,8 +175,9 @@ seriesType('spline', 'line'
  * A `spline` series. If the [type](#series.spline.type) option is
  * not specified, it is inherited from [chart.type](#chart.type).
  *
+ * @type      {Object}
  * @extends   series,plotOptions.spline
- * @excluding dataParser, dataURL, step
+ * @excluding dataParser,dataURL,step
  * @product   highcharts highstock
  * @apioption series.spline
  */
@@ -229,8 +208,8 @@ seriesType('spline', 'line'
  *     ]
  *  ```
  *
- * 3.  An array of objects with named values. The following snippet shows only a
- * few settings, see the complete options set below. If the total number of data
+ * 3.  An array of objects with named values. The objects are point
+ * configuration objects as seen below. If the total number of data
  * points exceeds the series' [turboThreshold](#series.spline.turboThreshold),
  * this option is not available.
  *
@@ -248,19 +227,18 @@ seriesType('spline', 'line'
  *     }]
  *  ```
  *
- * @sample {highcharts} highcharts/chart/reflow-true/
- *         Numerical values
- * @sample {highcharts} highcharts/series/data-array-of-arrays/
- *         Arrays of numeric x and y
- * @sample {highcharts} highcharts/series/data-array-of-arrays-datetime/
- *         Arrays of datetime x and y
- * @sample {highcharts} highcharts/series/data-array-of-name-value/
- *         Arrays of point.name and y
- * @sample {highcharts} highcharts/series/data-array-of-objects/
- *         Config objects
- *
- * @type      {Array<number|Array<number>|*>}
+ * @type      {Array<Object|Array|Number>}
  * @extends   series.line.data
+ * @sample    {highcharts} highcharts/chart/reflow-true/
+ *            Numerical values
+ * @sample    {highcharts} highcharts/series/data-array-of-arrays/
+ *            Arrays of numeric x and y
+ * @sample    {highcharts} highcharts/series/data-array-of-arrays-datetime/
+ *            Arrays of datetime x and y
+ * @sample    {highcharts} highcharts/series/data-array-of-name-value/
+ *            Arrays of point.name and y
+ * @sample    {highcharts} highcharts/series/data-array-of-objects/
+ *            Config objects
  * @product   highcharts highstock
  * @apioption series.spline.data
  */

@@ -271,7 +271,6 @@ var win = H.win,
     Series = H.Series,
     seriesTypes = H.seriesTypes,
     each = H.each,
-    objEach = H.objectEach,
     extend = H.extend,
     addEvent = H.addEvent,
     fireEvent = H.fireEvent,
@@ -503,12 +502,6 @@ function shouldForceChartSeriesBoosting(chart) {
 
             series = chart.series[i];
 
-            // Don't count series with boostThreshold set to 0
-            // See #8950
-            if (series.options.boostThreshold === 0) {
-                continue;
-            }
-
             if (boostableMap[series.type]) {
                 ++canBoostCount;
             }
@@ -524,37 +517,20 @@ function shouldForceChartSeriesBoosting(chart) {
         }
     }
 
-    chart.boostForceChartBoost = allowBoostForce && (
+    chart.boostForceChartBoost =
         (
+            allowBoostForce &&
             canBoostCount === chart.series.length &&
             sboostCount > 0
         ) ||
-        sboostCount > 5
-    );
+        sboostCount > 5;
 
     return chart.boostForceChartBoost;
 }
 
-/**
- * Return true if ths boost.enabled option is true
- * @param  {Highcharts.Chart} chart The chart
- * @return {boolean}
- */
-function boostEnabled(chart) {
-    return pick(
-        (
-            chart &&
-            chart.options &&
-            chart.options.boost &&
-            chart.options.boost.enabled
-        ),
-        true
-    );
-}
-
 /*
  * Returns true if the chart is in series boost mode
- * @param chart {Highcharts.Chart} - the chart to check
+ * @param chart {Highchart.Chart} - the chart to check
  * @returns {Boolean} - true if the chart is in series boost mode
  */
 Chart.prototype.isChartSeriesBoosting = function () {
@@ -825,19 +801,8 @@ function GLShader(gl) {
         // Uniform for invertion
         isInverted,
         plotHeightUniform,
-        // Error stack
-        errors = [],
         // Texture uniform
         uSamplerUniform;
-
-    /*
-     * Handle errors accumulated in errors stack
-     */
-    function handleErrors() {
-        if (errors.length) {
-            H.error('[highcharts boost] shader error - ' + errors.join('\n'));
-        }
-    }
 
     /* String to shader program
      * @param {string} str - the program source
@@ -853,13 +818,7 @@ function GLShader(gl) {
         gl.compileShader(shader);
 
         if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            errors.push(
-                'when compiling ' +
-                type +
-                ' shader:\n' +
-                gl.getShaderInfoLog(shader)
-            );
-
+            // console.error('shader error:', gl.getShaderInfoLog(shader));
             return false;
         }
         return shader;
@@ -876,7 +835,7 @@ function GLShader(gl) {
 
         if (!v || !f) {
             shaderProgram = false;
-            handleErrors();
+            // console.error('error creating shader program');
             return false;
         }
 
@@ -888,15 +847,7 @@ function GLShader(gl) {
 
         gl.attachShader(shaderProgram, v);
         gl.attachShader(shaderProgram, f);
-
         gl.linkProgram(shaderProgram);
-
-        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-            errors.push(gl.getProgramInfoLog(shaderProgram));
-            handleErrors();
-            shaderProgram = false;
-            return false;
-        }
 
         gl.useProgram(shaderProgram);
 
@@ -913,7 +864,6 @@ function GLShader(gl) {
         isCircleUniform = uloc('isCircle');
         isInverted = uloc('isInverted');
         plotHeightUniform = uloc('plotHeight');
-
         return true;
     }
 
@@ -921,9 +871,11 @@ function GLShader(gl) {
      * Destroy the shader
      */
     function destroy() {
-        if (gl && shaderProgram) {
-            gl.deleteProgram(shaderProgram);
-            shaderProgram = false;
+        if (gl) {
+            if (shaderProgram) {
+                gl.deleteProgram(shaderProgram);
+                shaderProgram = false;
+            }
         }
     }
 
@@ -933,9 +885,7 @@ function GLShader(gl) {
      * or until 0 is bound.
      */
     function bind() {
-        if (gl && shaderProgram) {
-            gl.useProgram(shaderProgram);
-        }
+        gl.useProgram(shaderProgram);
     }
 
     /*
@@ -945,24 +895,17 @@ function GLShader(gl) {
      * @param val {float} - the value to set
      */
     function setUniform(name, val) {
-        if (gl && shaderProgram) {
-            var u = uLocations[name] = uLocations[name] ||
-                                       gl.getUniformLocation(
-                                          shaderProgram,
-                                          name
-                                       );
-            gl.uniform1f(u, val);
-        }
+        var u = uLocations[name] = uLocations[name] ||
+                                    gl.getUniformLocation(shaderProgram, name);
+        gl.uniform1f(u, val);
     }
 
     /*
      * Set the active texture
      * @param texture - the texture
      */
-    function setTexture(texture) {
-        if (gl && shaderProgram) {
-            gl.uniform1i(uSamplerUniform, texture);
-        }
+    function setTexture() {
+        gl.uniform1i(uSamplerUniform, 0);
     }
 
     /*
@@ -970,34 +913,26 @@ function GLShader(gl) {
      * @flag is the state
      */
     function setInverted(flag) {
-        if (gl && shaderProgram) {
-            gl.uniform1i(isInverted, flag);
-        }
+        gl.uniform1i(isInverted, flag);
     }
 
     /*
      * Enable/disable circle drawing
      */
     function setDrawAsCircle(flag) {
-        if (gl && shaderProgram) {
-            gl.uniform1i(isCircleUniform, flag ? 1 : 0);
-        }
+        gl.uniform1i(isCircleUniform, flag ? 1 : 0);
     }
 
     function setPlotHeight(n) {
-        if (gl && shaderProgram) {
-            gl.uniform1f(plotHeightUniform, n);
-        }
+        gl.uniform1f(plotHeightUniform, n);
     }
 
     /*
      * Flush
      */
     function reset() {
-        if (gl && shaderProgram) {
-            gl.uniform1i(isBubbleUniform, 0);
-            gl.uniform1i(isCircleUniform, 0);
-        }
+        gl.uniform1i(isBubbleUniform, 0);
+        gl.uniform1i(isCircleUniform, 0);
     }
 
     /*
@@ -1009,7 +944,7 @@ function GLShader(gl) {
             zMin = Number.MAX_VALUE,
             zMax = -Number.MAX_VALUE;
 
-        if (gl && shaderProgram && series.type === 'bubble') {
+        if (series.type === 'bubble') {
             zMin = pick(seriesOptions.zMin, Math.min(
                 zMin,
                 Math.max(
@@ -1045,24 +980,20 @@ function GLShader(gl) {
      * @param color {Array<float>} - an array with RGBA values
      */
     function setColor(color) {
-        if (gl && shaderProgram) {
-            gl.uniform4f(
-                fillColorUniform,
-                color[0] / 255.0,
-                color[1] / 255.0,
-                color[2] / 255.0,
-                color[3]
-            );
-        }
+        gl.uniform4f(
+            fillColorUniform,
+            color[0] / 255.0,
+            color[1] / 255.0,
+            color[2] / 255.0,
+            color[3]
+        );
     }
 
     /*
      * Set skip translation
      */
     function setSkipTranslation(flag) {
-        if (gl && shaderProgram) {
-            gl.uniform1i(skipTranslationUniform, flag === true ? 1 : 0);
-        }
+        gl.uniform1i(skipTranslationUniform, flag === true ? 1 : 0);
     }
 
     /*
@@ -1070,9 +1001,7 @@ function GLShader(gl) {
      * @param m {Matrix4x4} - the matrix
      */
     function setPMatrix(m) {
-        if (gl && shaderProgram) {
-            gl.uniformMatrix4fv(pUniform, false, m);
-        }
+        gl.uniformMatrix4fv(pUniform, false, m);
     }
 
     /*
@@ -1080,9 +1009,7 @@ function GLShader(gl) {
      * @param p {float} - point size
      */
     function setPointSize(p) {
-        if (gl && shaderProgram) {
-            gl.uniform1f(psUniform, p);
-        }
+        gl.uniform1f(psUniform, p);
     }
 
     /*
@@ -1094,9 +1021,7 @@ function GLShader(gl) {
     }
 
     if (gl) {
-        if (!createShader()) {
-            return false;
-        }
+        createShader();
     }
 
     return {
@@ -1308,16 +1233,20 @@ function GLRenderer(postRenderCallback) {
         data = false,
         // The marker data
         markerData = false,
+        // Is the texture ready?
+        textureIsReady = false,
         // Exports
         exports = {},
         // Is it inited?
         isInited = false,
         // The series stack
         series = [],
-
-        // Texture handles
-        textureHandles = {},
-
+        // Texture for circles
+        circleTexture = doc.createElement('canvas'),
+        // Context for circle texture
+        circleCtx = circleTexture.getContext('2d'),
+        // Handle for the circle texture
+        circleTextureHandle,
         // Things to draw as "rectangles" (i.e lines)
         asBar = {
             'column': true,
@@ -1491,11 +1420,10 @@ function GLRenderer(postRenderCallback) {
             color,
             scolor,
             sdata = isStacked ? series.data : (xData || rawData),
-            closestLeft = { x: Number.MAX_VALUE, y: 0 },
-            closestRight = { x: -Number.MAX_VALUE, y: 0 },
+            closestLeft = { x: -Number.MAX_VALUE, y: 0 },
+            closestRight = { x: Number.MIN_VALUE, y: 0 },
 
             skipped = 0,
-            hadPoints = false,
 
             cullXThreshold = 1,
             cullYThreshold = 1,
@@ -1516,8 +1444,7 @@ function GLRenderer(postRenderCallback) {
             pcolor = false,
             drawAsBar = asBar[series.type],
             isXInside = false,
-            isYInside = true,
-            threshold = options.threshold;
+            isYInside = true;
 
         if (options.boostData && options.boostData.length > 0) {
             return;
@@ -1825,7 +1752,7 @@ function GLRenderer(postRenderCallback) {
                 closestRight.y = y;
             }
 
-            if (x < xMin && closestLeft.x > xMin) {
+            if (x < xMin && closestLeft.x < xMin) {
                 closestLeft.x = x;
                 closestLeft.y = y;
             }
@@ -1861,13 +1788,6 @@ function GLRenderer(postRenderCallback) {
                 }
 
                 if (x > plotWidth) {
-                    // If this is  rendered as a point, just skip drawing it
-                    // entirely, as we're not dependandt on lineTo'ing to it.
-                    // See #8197
-                    if (inst.drawMode === 'points') {
-                        continue;
-                    }
-
                     x = plotWidth;
                 }
 
@@ -1886,9 +1806,6 @@ function GLRenderer(postRenderCallback) {
                     }
                 }
 
-                if (!isRange && !isStacked) {
-                    minVal = Math.max(threshold, yMin); // #8731
-                }
                 if (!settings.useGPUTranslations) {
                     minVal = yAxis.toPixels(minVal, true);
                 }
@@ -1926,7 +1843,7 @@ function GLRenderer(postRenderCallback) {
 
             if (!settings.useGPUTranslations &&
                 !settings.usePreallocated &&
-                (lastX && Math.abs(x - lastX) < cullXThreshold) &&
+                (lastX && x - lastX < cullXThreshold) &&
                 (lastY && Math.abs(y - lastY) < cullYThreshold)
             ) {
                 if (settings.debug.showSkipSummary) {
@@ -1970,15 +1887,13 @@ function GLRenderer(postRenderCallback) {
 
             lastX = x;
             lastY = y;
-
-            hadPoints = true;
         }
 
         if (settings.debug.showSkipSummary) {
             console.log('skipped points:', skipped); // eslint-disable-line no-console
         }
 
-        function pushSupplementPoint(point, atStart) {
+        function pushSupplementPoint(point) {
             if (!settings.useGPUTranslations) {
                 inst.skipTranslation = true;
                 point.x = xAxis.toPixels(point.x, true);
@@ -1988,11 +1903,6 @@ function GLRenderer(postRenderCallback) {
             // We should only do this for lines, and we should ignore markers
             // since there's no point here that would have a marker.
 
-            if (atStart) {
-                data = [point.x, point.y, 0, 2].concat(data);
-                return;
-            }
-
             vertice(
                 point.x,
                 point.y,
@@ -2001,19 +1911,13 @@ function GLRenderer(postRenderCallback) {
             );
         }
 
-        if (
-            !hadPoints &&
+        if (!lastX &&
             connectNulls !== false &&
-            series.drawMode === 'line_strip'
-        ) {
-            if (closestLeft.x < Number.MAX_VALUE) {
-                // We actually need to push this *before* the complete buffer.
-                pushSupplementPoint(closestLeft, true);
-            }
-
-            if (closestRight.x > -Number.MAX_VALUE) {
-                pushSupplementPoint(closestRight);
-            }
+            closestLeft > -Number.MAX_VALUE &&
+            closestRight < Number.MAX_VALUE) {
+            // There are no points within the selected range
+            pushSupplementPoint(closestLeft);
+            pushSupplementPoint(closestRight);
         }
 
         closeSegment();
@@ -2152,7 +2056,7 @@ function GLRenderer(postRenderCallback) {
             return false;
         }
 
-        if (!gl || !width || !height || !shader) {
+        if (!gl || !width || !height) {
             return false;
         }
 
@@ -2165,6 +2069,7 @@ function GLRenderer(postRenderCallback) {
 
         shader.bind();
 
+
         gl.viewport(0, 0, width, height);
         shader.setPMatrix(orthoMatrix(width, height));
         shader.setPlotHeight(chart.plotHeight);
@@ -2176,12 +2081,17 @@ function GLRenderer(postRenderCallback) {
         vbuffer.build(exports.data, 'aVertexPosition', 4);
         vbuffer.bind();
 
+        if (textureIsReady) {
+            gl.bindTexture(gl.TEXTURE_2D, circleTextureHandle);
+            shader.setTexture(circleTextureHandle);
+        }
+
         shader.setInverted(chart.inverted);
+
 
         // Render the series
         each(series, function (s, si) {
             var options = s.series.options,
-                shapeOptions = options.marker,
                 sindex,
                 lineWidth = typeof options.lineWidth !== 'undefined' ?
                     options.lineWidth :
@@ -2202,22 +2112,7 @@ function GLRenderer(postRenderCallback) {
                             ) || 10)
                 ),
                 fillColor,
-                shapeTexture = textureHandles[
-                    (shapeOptions && shapeOptions.symbol) || s.series.symbol
-                ] || textureHandles.circle,
                 color;
-
-            if (
-                s.segments.length === 0 ||
-                (s.segmentslength && s.segments[0].from === s.segments[0].to)
-            ) {
-                return;
-            }
-
-            if (shapeTexture.isReady) {
-                gl.bindTexture(gl.TEXTURE_2D, shapeTexture.handle);
-                shader.setTexture(shapeTexture.handle);
-            }
 
             
             fillColor =
@@ -2302,7 +2197,7 @@ function GLRenderer(postRenderCallback) {
             }
 
             shader.setDrawAsCircle(
-                asCircle[s.series.type] || false
+                (asCircle[s.series.type] && textureIsReady) || false
             );
 
             // Do the actual rendering
@@ -2375,8 +2270,8 @@ function GLRenderer(postRenderCallback) {
      * @param h {Integer} - the height of the viewport
      */
     function setSize(w, h) {
-        // Skip if there's no change, or if we have no valid shader
-        if ((width === w && h === h) || !shader) {
+        // Skip if there's no change
+        if (width === w && h === h) {
             return;
         }
 
@@ -2435,127 +2330,71 @@ function GLRenderer(postRenderCallback) {
         gl.depthFunc(gl.LESS);
 
         shader = GLShader(gl); // eslint-disable-line new-cap
-
-        if (!shader) {
-            // We need to abort, there's no shader context
-            return false;
-        }
-
         vbuffer = GLVertexBuffer(gl, shader); // eslint-disable-line new-cap
 
-        function createTexture(name, fn) {
-            var props = {
-                    isReady: false,
-                    texture: doc.createElement('canvas'),
-                    handle: gl.createTexture()
-                },
-                ctx = props.texture.getContext('2d');
+        textureIsReady = false;
 
-            textureHandles[name] = props;
+        // Set up the circle texture used for bubbles
+        circleTextureHandle = gl.createTexture();
 
-            props.texture.width = 512;
-            props.texture.height = 512;
+        // Draw the circle
+        circleTexture.width = 512;
+        circleTexture.height = 512;
 
-            ctx.mozImageSmoothingEnabled = false;
-            ctx.webkitImageSmoothingEnabled = false;
-            ctx.msImageSmoothingEnabled = false;
-            ctx.imageSmoothingEnabled = false;
+        circleCtx.mozImageSmoothingEnabled = false;
+        circleCtx.webkitImageSmoothingEnabled = false;
+        circleCtx.msImageSmoothingEnabled = false;
+        circleCtx.imageSmoothingEnabled = false;
 
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0)';
-            ctx.fillStyle = '#FFF';
+        circleCtx.strokeStyle = 'rgba(255, 255, 255, 0)';
+        circleCtx.fillStyle = '#FFF';
 
-            fn(ctx);
+        circleCtx.beginPath();
+        circleCtx.arc(256, 256, 256, 0, 2 * Math.PI);
+        circleCtx.stroke();
+        circleCtx.fill();
 
-            try {
+        try {
 
-                gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, props.handle);
-                // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+            gl.bindTexture(gl.TEXTURE_2D, circleTextureHandle);
+            // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
 
-                gl.texImage2D(
-                    gl.TEXTURE_2D,
-                    0,
-                    gl.RGBA,
-                    gl.RGBA,
-                    gl.UNSIGNED_BYTE,
-                    props.texture
-                );
+            gl.texImage2D(
+                gl.TEXTURE_2D,
+                0,
+                gl.RGBA,
+                gl.RGBA,
+                gl.UNSIGNED_BYTE,
+                circleTexture
+            );
 
-                gl.texParameteri(
-                    gl.TEXTURE_2D,
-                    gl.TEXTURE_WRAP_S,
-                    gl.CLAMP_TO_EDGE
-                );
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_WRAP_S,
+                gl.CLAMP_TO_EDGE
+            );
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_WRAP_T,
+                gl.CLAMP_TO_EDGE
+            );
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_MAG_FILTER,
+                gl.LINEAR
+            );
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_MIN_FILTER,
+                gl.LINEAR
+            );
 
-                gl.texParameteri(
-                    gl.TEXTURE_2D,
-                    gl.TEXTURE_WRAP_T,
-                    gl.CLAMP_TO_EDGE
-                );
+            // gl.generateMipmap(gl.TEXTURE_2D);
 
-                gl.texParameteri(
-                    gl.TEXTURE_2D,
-                    gl.TEXTURE_MAG_FILTER,
-                    gl.LINEAR
-                );
+            gl.bindTexture(gl.TEXTURE_2D, null);
 
-                gl.texParameteri(
-                    gl.TEXTURE_2D,
-                    gl.TEXTURE_MIN_FILTER,
-                    gl.LINEAR
-                );
-
-                // gl.generateMipmap(gl.TEXTURE_2D);
-
-                gl.bindTexture(gl.TEXTURE_2D, null);
-
-                props.isReady = true;
-            } catch (e) {}
-        }
-
-        // Circle shape
-        createTexture('circle', function (ctx) {
-            ctx.beginPath();
-            ctx.arc(256, 256, 256, 0, 2 * Math.PI);
-            ctx.stroke();
-            ctx.fill();
-        });
-
-        // Square shape
-        createTexture('square', function (ctx) {
-            ctx.fillRect(0, 0, 512, 512);
-        });
-
-        // Diamond shape
-        createTexture('diamond', function (ctx) {
-            ctx.beginPath();
-            ctx.moveTo(256, 0);
-            ctx.lineTo(512, 256);
-            ctx.lineTo(256, 512);
-            ctx.lineTo(0, 256);
-            ctx.lineTo(256, 0);
-            ctx.fill();
-        });
-
-        // Triangle shape
-        createTexture('triangle', function (ctx) {
-            ctx.beginPath();
-            ctx.moveTo(0, 512);
-            ctx.lineTo(256, 0);
-            ctx.lineTo(512, 512);
-            ctx.lineTo(0, 512);
-            ctx.fill();
-        });
-
-        // Triangle shape (rotated)
-        createTexture('triangle-down', function (ctx) {
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(256, 512);
-            ctx.lineTo(512, 0);
-            ctx.lineTo(0, 0);
-            ctx.fill();
-        });
+            textureIsReady = true;
+        } catch (e) {}
 
         isInited = true;
 
@@ -2587,13 +2426,9 @@ function GLRenderer(postRenderCallback) {
         vbuffer.destroy();
         shader.destroy();
         if (gl) {
-
-            objEach(textureHandles, function (key) {
-                if (textureHandles[key].handle) {
-                    gl.deleteTexture(textureHandles[key].handle);
-                }
-            });
-
+            if (circleTextureHandle) {
+                gl.deleteTexture(circleTextureHandle);
+            }
             gl.canvas.width = 1;
             gl.canvas.height = 1;
         }
@@ -2765,13 +2600,7 @@ function createAndAttachRenderer(chart, series) {
 
         }); // eslint-disable-line new-cap
 
-        if (!target.ogl.init(target.canvas)) {
-            // The OGL renderer couldn't be inited.
-            // This likely means a shader error as we wouldn't get to this point
-            // if there was no WebGL support.
-            H.error('[highcharts boost] - unable to init WebGL renderer');
-        }
-
+        target.ogl.init(target.canvas);
         // target.ogl.clear();
         target.ogl.setOptions(chart.options.boost || {});
 
@@ -2961,16 +2790,24 @@ each([
 ], function (method) {
     function branch(proceed) {
         var letItPass = this.options.stacking &&
-            (method === 'translate' || method === 'generatePoints');
+                        (method === 'translate' || method === 'generatePoints'),
+            enabled = pick(
+                (
+                    this.chart &&
+                    this.chart.options &&
+                    this.chart.options.boost &&
+                    this.chart.options.boost.enabled
+                ),
+                true
+            );
 
         if (
             !this.isSeriesBoosting ||
             letItPass ||
-            !boostEnabled(this.chart) ||
+            !enabled ||
             this.type === 'heatmap' ||
             this.type === 'treemap' ||
-            !boostableMap[this.type] ||
-            this.options.boostThreshold === 0
+            !boostableMap[this.type]
         ) {
 
             proceed.call(this);
@@ -3015,7 +2852,7 @@ wrap(Series.prototype, 'processData', function (proceed) {
         );
     }
 
-    if (boostEnabled(this.chart) && boostableMap[this.type]) {
+    if (boostableMap[this.type]) {
 
         // If there are no extremes given in the options, we also need to
         // process the data to read the data extremes. If this is a heatmap, do
@@ -3259,7 +3096,6 @@ if (!H.hasWebGLSupport()) {
                 minI,
                 maxI,
                 boostOptions,
-                compareX = options.findNearestPointBy === 'x',
 
                 xDataFull = (
                     this.xData ||
@@ -3269,8 +3105,8 @@ if (!H.hasWebGLSupport()) {
                 ),
 
                 addKDPoint = function (clientX, plotY, i) {
-                    // Shaves off about 60ms compared to repeated concatenation
-                    index = compareX ? clientX : clientX + ',' + plotY;
+                    // Shaves off about 60ms compared to repeated concatination
+                    index = clientX + ',' + plotY;
 
                     // The k-d tree requires series points.
                     // Reduce the amount of points, since the time to build the
@@ -3342,6 +3178,7 @@ if (!H.hasWebGLSupport()) {
                 renderer.pushSeries(series);
                 // Perform the actual renderer if we're on series level
                 renderIfNotSeriesBoosting(renderer, this, chart);
+                // console.log(series, chart);
             }
 
             /* This builds the KD-tree */
